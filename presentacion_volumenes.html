@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>OpenStack. Almacenamiento de volúmenes</title>
+
+    <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+    <meta name="author" content="Hakim El Hattab">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="reveal.js/css/reveal.css">
+    <link rel="stylesheet" href="reveal.js/css/theme/white.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+        <!--[if lt IE 9]>                                                                                                                                                                       
+        <script src="lib/js/html5shiv.js"></script>                                                                                                                                         
+        <![endif]-->
+  </head>
+
+  <body>
+    <div class="reveal">
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+	
+<section>
+  <h3>OpenStack. Almacenamiento de Volúmenes</h3>
+  <p>
+    <small><a href="http://albertomolina.wordpress.com">Alberto Molina
+	Coballes</a> / <a
+			  href="http://twitter.com/alberto_molina">@alberto_molina</a> y <a
+											    href="http://josedomingo.org">José Domingo Muñoz
+	Rodríguez</a> / <a
+			   href="http://twitter.com/Pledin_JD">@Pledin_JD</a> </small>
+  </p>
+  <p><small>
+      <a href="http://creativecommons.org/licenses/by-sa/3.0/"><img src="img/cc_by_sa.png"
+								    width="100px" class="plain"/></a></small></p>
+  <p><small>
+      Theme
+      by <a href="http://lab.hakim.se/reveal-js/#/">reveal.js</a>
+    </small>
+  </p>
+</section>
+<section>
+	<ol>
+	  <li>Conceptos previos</li>
+	  <li>Volúmenes, instantáneas y lanzamiento de instancias desde
+	  volúmenes con Horizon</li>
+	  <li>Volúmenes, instantáneas y lanzamiento de instancias desde
+	  volúmenes nova cli</li>
+	  <li>Funcionamiento interno de los volúmenes</li>
+	</ol>
+
+</section>
+<section>
+  <section>
+    <h2>Conceptos previos</h2>
+  </section>
+  <section>
+    <h2>Redes de almacenamiento</h2>
+    <h3><em>Storage Area Network (SAN)</em></h3>
+    <ul>
+      <li>Red dedicada de almacenamiento que proporciona dispositivos de bloques a
+	los servidores</li>
+      <li>Los elementos típicos de una SAN son:
+	<ul>
+	  <li>Red dedicada alta velocidad (cobre o fibra óptica)</li>
+	  <li>Equipos o servidores que proporcionan el almacenamiento</li>
+	  <li>Servidores que utilizan los dispositivos de bloques</li></ul>
+      </li>
+      <li>Los protocolos más utilizados
+      son <a href="http://en.wikipedia.org/wiki/ISCSI">iSCSI</a>
+      y <a href="http://en.wikipedia.org/wiki/Fiber_channel">Fibre Channel (FC)</a></li>
+    </ul>
+  </section>
+  <section>
+    <h2>Storage Area Network (SAN)</h2>
+    <p><img src="img/san.png" alt="esquema SAN" /></p>
+  </section>
+  <section>
+    <h2>SAN en OpenStack</h2>
+    <ul>
+      <li>Cinder (OpenStack block storage) gestiona de forma sencilla una
+      SAN</li>
+      <li>Puede utilizar una red específica para almacenamiento o alguna de las
+      redes internas del cloud (gestión, datos, etc.)</li>
+      <li>Soporta gran cantidad de tecnologías libres de almacenamiento:
+      GlusterFS, LVM, ZFS o Ceph RBD</li>
+      <li>Además incluye gran cantidad
+      de <a href="https://wiki.openstack.org/wiki/CinderSupportMatrix">controladores</a>
+      para equipos específicos</li>
+    </ul>
+  </section>
+  <section>
+    <h2>Terminología</h2>
+    <ul>
+      <li><strong>Volumen</strong>: Dispositivo de bloques que se puede
+	asociar y desasociar de una instancia cuando se desee</li>
+      <li>Utilizado para proporcionar almacenamiento permanente o independiente
+	de la vida de una instancia</li>
+      <li>Un volumen en cinder es equivalente a una unidad lógica en SAN</li>
+      <li>Cinder es equivalente a <a href="http://aws.amazon.com/es/ebs/">Amazon
+      EBS</a></li>
+      <li>Hasta ahora no es posible asociar un volumen a más de una instancia a
+      la vez o modificar el tamaño de un volumen "en caliente"</li>
+    </ul>
+  </section>
+</section>
+<section>
+  <section>
+    <h2>Volúmenes con GUI</h2>
+  </section>
+  <section>
+    <ul>
+      <li>Crear un volúmen, asociarlo y desasociarlo a una instancia</li>
+      <li>Formatear volúmenes</li>
+      <li>Redimensionar volúmenes</li>
+      <li>Instantáneas de volumen (en uso o no)</li>
+      <li>Iniciar una instancia desde un volumen</li>
+    </ul>
+  </section>
+</section>
+<section>
+  <section>
+    <h2>Volúmenes con OpenStack CLI</h2>
+  </section>
+  <section>
+    <h2>Volúmenes</h2>
+    <pre><code>
+#Listar volúmenes
+$ nova volume-list
+#Crear un volumen
+$ nova volume-create --display-name NOMBRE SIZE
+#Asociar un volumen a una instancia
+$ nova volume-attach SERVIDOR_ID VOLUMEN_ID DISPOSITIVO
+#Desasociar un volumen de una instancia
+$ nova volume-detach SERVIDOR_ID VOLUMEN_ID
+#Crear una instantánea de volumen
+$ nova volume-snapshot-create [opciones] VOLUMEN_ID
+    </code></pre>
+  </section>
+  <section>
+	<h2>Redimensionar volúmenes</h2>
+	<p>Para hacer esta operación necesitamos el cliente cinder.</p>
+    <pre><code>
+# pip install python-cinderclient
+
+#Redimensionar un volumen
+$ cinder extend ID_VOLUME NEW_SIZE
+    </code></pre>
+  </section>
+</section>
+
+<section>
+  <h2>Conceptos avanzados</h2>
+  <ul>
+    <li>Volúmenes con LVM</li>
+    <li>Compartir volumen con iSCSI: tgt</li>
+  </ul>
+</section>
+      </div>
+    </div>
+
+    <script src="reveal.js/lib/js/head.min.js"></script>
+    <script src="reveal.js/js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+
+      transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+      // Optional reveal.js plugins
+      dependencies: [
+      { src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'reveal.js/plugin/zoom-js/zoom.js', async: true },
+      { src: 'reveal.js/plugin/notes/notes.js', async: true }
+      ]
+      });
+
+    </script>
+
+  </body>
+</html>
+

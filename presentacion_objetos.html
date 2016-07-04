@@ -41,7 +41,7 @@
 	
 <section>
   <h1>OpenStack</h1>
-  <h3>Swift. Trabajo con Objetos</h3>
+  <h3>Swift. Almacenamiento de Objetos</h3>
   <p>
     <small><a href="http://albertomolina.wordpress.com">Alberto Molina
 	Coballes</a> / <a
@@ -97,7 +97,11 @@
 	relacionado con un fichero o archivo, pero además incluye una serie de
 	metadatos.</li>
       <li><strong>ACL</strong>: Utilizada para gestionar los permisos que otros
-      usuarios pueden tener sobre cada contenedor, no sobre cada objeto.</li>
+	usuarios pueden tener sobre cada contenedor, no sobre cada objeto. Por ejemplo, para dar permisos de lectura y listado a un contenedor:
+	<pre>
+	  swift post contenedor -r ".r:*,.rlistings"
+	</pre>
+      </li>
     </ul>
   </section>
 </div>
